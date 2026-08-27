@@ -3,963 +3,1051 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Feliz Cumpleaños T-Rex</title>
+<title>🎂 Feliz Cumpleaños T-Rex 🦖</title>
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
-    background:#17152b;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
+body {
+    overflow: hidden;
+    background: #17132f;
+    font-family: Arial, sans-serif;
 }
 
-canvas{
-    display:block;
-    width:100vw;
-    height:100vh;
-    image-rendering:pixelated;
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    image-rendering: pixelated;
 }
-
 </style>
 </head>
 
 <body>
 
-<canvas id="game"></canvas>
+<canvas id="canvas"></canvas>
 
 <script>
 
-const canvas = document.getElementById("game");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-let W;
-let H;
+let W, H;
 
-function resize(){
-
+function resize() {
     W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
-
 }
 
 resize();
+window.addEventListener("resize", resize);
 
-window.addEventListener("resize",resize);
 
-
-/* =========================================
+/* =====================================================
    VARIABLES
-========================================= */
+===================================================== */
 
-let tiempo = 0;
-
-let fase = "inicio";
+let inicio = performance.now();
 
 let trex = {
-    x:-180,
-    y:0,
-    escala:1,
-    velocidad:3
+    x: -180,
+    destino: 0,
+    escala: 1
 };
 
 let panda = {
-    x:W+180,
-    y:0,
-    escala:.78,
-    velocidad:2.7
+    x: 0,
+    destino: 0,
+    escala: 0.78
 };
 
 let confeti = [];
 
-let corazones = [];
+let estrellas = [];
 
 
-/* =========================================
-   UTILIDADES
-========================================= */
+/* =====================================================
+   FUNCIONES BÁSICAS
+===================================================== */
 
-function rect(x,y,w,h,color){
-
-    ctx.fillStyle=color;
+function rect(x, y, w, h, color) {
+    ctx.fillStyle = color;
     ctx.fillRect(
         Math.round(x),
         Math.round(y),
         Math.round(w),
         Math.round(h)
     );
-
 }
 
 
-/* =========================================
+function texto(txt, x, y, tamaño, color, sombra = true) {
+
+    ctx.textAlign = "center";
+    ctx.font = `900 ${tamaño}px Arial`;
+
+    if (sombra) {
+        ctx.fillStyle = "#17131f";
+        ctx.fillText(txt, x + 4, y + 4);
+    }
+
+    ctx.fillStyle = color;
+    ctx.fillText(txt, x, y);
+}
+
+
+/* =====================================================
    FONDO
-========================================= */
+===================================================== */
 
-function fondo(){
+function dibujarFondo() {
 
-    /* cielo */
+    const cielo = ctx.createLinearGradient(0, 0, 0, H);
 
-    let cielo = ctx.createLinearGradient(0,0,0,H);
+    cielo.addColorStop(0, "#282052");
+    cielo.addColorStop(0.45, "#7158a8");
+    cielo.addColorStop(0.72, "#d78c9b");
+    cielo.addColorStop(1, "#f5c58c");
 
-    cielo.addColorStop(0,"#5440a6");
-    cielo.addColorStop(.55,"#9b66c8");
-    cielo.addColorStop(1,"#f1a477");
-
-    ctx.fillStyle=cielo;
-    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = cielo;
+    ctx.fillRect(0, 0, W, H);
 
 
-    /* estrellas */
+    /* Luna */
 
-    for(let i=0;i<35;i++){
+    ctx.fillStyle = "#fff3c4";
 
-        let x=(i*137)%W;
-        let y=(i*71)%(H*.45);
+    ctx.beginPath();
+    ctx.arc(
+        W * 0.82,
+        H * 0.17,
+        42,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+
+    /* Estrellas */
+
+    for (let i = 0; i < 35; i++) {
+
+        let x = (i * 173) % W;
+        let y = (i * 83) % (H * .45);
+
+        let brillo =
+            0.45 +
+            Math.sin(performance.now() / 500 + i) * .3;
 
         rect(
             x,
             y,
             4,
             4,
-            "rgba(255,255,255,.7)"
+            `rgba(255,255,255,${brillo})`
         );
-
     }
 
 
-    /* luna */
+    /* Montañas */
 
-    ctx.fillStyle="#fff1b8";
+    ctx.fillStyle = "#4c536c";
 
     ctx.beginPath();
 
-    ctx.arc(
-        W*.82,
-        H*.16,
-        45,
-        0,
-        Math.PI*2
+    ctx.moveTo(0, H * .62);
+    ctx.lineTo(W * .17, H * .38);
+    ctx.lineTo(W * .32, H * .62);
+    ctx.lineTo(W * .50, H * .34);
+    ctx.lineTo(W * .70, H * .62);
+    ctx.lineTo(W * .86, H * .40);
+    ctx.lineTo(W, H * .62);
+
+    ctx.fill();
+
+
+    /* Colinas */
+
+    ctx.fillStyle = "#407449";
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, H * .62);
+    ctx.quadraticCurveTo(
+        W * .25,
+        H * .50,
+        W * .50,
+        H * .63
     );
 
+    ctx.quadraticCurveTo(
+        W * .75,
+        H * .52,
+        W,
+        H * .62
+    );
+
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
     ctx.fill();
 
 
-    /* montañas */
-
-    ctx.fillStyle="#3b5960";
-
-    ctx.beginPath();
-
-    ctx.moveTo(0,H*.60);
-    ctx.lineTo(W*.18,H*.35);
-    ctx.lineTo(W*.35,H*.60);
-    ctx.lineTo(W*.52,H*.30);
-    ctx.lineTo(W*.72,H*.60);
-    ctx.lineTo(W*.88,H*.38);
-    ctx.lineTo(W,H*.60);
-
-    ctx.fill();
-
-
-    /* suelo */
+    /* Pasto */
 
     rect(
         0,
-        H*.60,
+        H * .66,
         W,
-        H*.40,
-        "#3b8c4a"
+        H * .34,
+        "#3b914d"
     );
 
 
-    /* cuadritos del suelo */
+    /* Camino */
 
-    for(let x=0;x<W;x+=45){
+    ctx.fillStyle = "#c39a68";
 
-        rect(
-            x,
-            H*.67,
-            22,
-            8,
-            "#33763d"
-        );
+    ctx.beginPath();
+
+    ctx.moveTo(W * .32, H);
+    ctx.lineTo(W * .43, H * .64);
+    ctx.lineTo(W * .57, H * .64);
+    ctx.lineTo(W * .68, H);
+
+    ctx.fill();
+
+
+    /* Flores */
+
+    for (let i = 0; i < 15; i++) {
+
+        let x = 30 + (i * 127) % (W - 60);
+        let y = H * .70 + (i % 3) * 35;
+
+        rect(x, y, 5, 12, "#39743e");
+
+        rect(x - 5, y - 5, 8, 8, "#ffb5cf");
+        rect(x + 4, y - 5, 8, 8, "#ffb5cf");
 
     }
-
 }
 
 
-/* =========================================
+/* =====================================================
    T-REX
-========================================= */
+===================================================== */
 
-function dibujarTrex(x,y,s,caminar){
+function dibujarTrex(x, y, escala, caminando) {
 
     ctx.save();
 
-    ctx.translate(x,y);
-    ctx.scale(s,s);
+    ctx.translate(x, y);
+    ctx.scale(escala, escala);
+
+    let paso =
+        caminando
+        ? Math.sin(performance.now() / 100) * 10
+        : 0;
 
 
-    let movimiento =
-        caminar ?
-        Math.sin(tiempo*.35)*12 :
-        0;
+    /* COLA */
+
+    rect(-145, -135, 110, 45, "#3d852f");
+    rect(-180, -120, 65, 30, "#347328");
+
+    rect(-195, -110, 30, 18, "#286322");
 
 
-    /* cola */
+    /* CUERPO DEL DISFRAZ */
 
-    rect(
-        -125,
-        -115,
-        120,
-        45,
-        "#3c812f"
-    );
+    rect(-65, -230, 125, 145, "#4c9637");
 
-    rect(
-        -155,
-        -100,
-        55,
-        30,
-        "#326b29"
-    );
+    /* barriga */
+
+    rect(-35, -215, 65, 115, "#b5ad55");
+
+    /* manchas */
+
+    rect(-55, -205, 18, 20, "#326e29");
+    rect(38, -190, 17, 25, "#326e29");
 
 
-    /* cuerpo */
+    /* CABEZA DEL T-REX */
 
-    rect(
-        -55,
-        -210,
-        115,
-        150,
-        "#4d9638"
-    );
-
-    rect(
-        -40,
-        -195,
-        75,
-        115,
-        "#a5a94a"
-    );
-
-
-    /* cabeza */
-
-    rect(
-        -65,
-        -310,
-        135,
-        110,
-        "#4c9237"
-    );
-
+    rect(-75, -330, 145, 115, "#4b9137");
 
     /* hocico */
 
-    rect(
-        45,
-        -280,
-        80,
-        55,
-        "#39772d"
-    );
+    rect(45, -300, 90, 60, "#3e7d30");
+
+    /* parte inferior de mandíbula */
+
+    rect(55, -245, 75, 25, "#2d5428");
 
 
-    /* boca */
+    /* BOCA */
 
-    rect(
-        45,
-        -235,
-        80,
-        15,
-        "#251d20"
-    );
+    rect(50, -252, 82, 15, "#1c1820");
 
 
-    /* dientes */
+    /* DIENTES */
 
-    for(let i=0;i<5;i++){
+    for (let i = 0; i < 6; i++) {
 
         rect(
-            52+i*15,
-            -235,
+            54 + i * 13,
+            -252,
             8,
-            18,
-            "#fff4d1"
+            16,
+            "#fff4d2"
         );
-
     }
 
 
-    /* cabello */
+    /* OJOS */
+
+    rect(-35, -298, 24, 22, "#171717");
+    rect(10, -298, 24, 22, "#171717");
+
+    rect(-28, -294, 7, 7, "#ffffff");
+    rect(17, -294, 7, 7, "#ffffff");
+
+
+    /* CABELLO CAFÉ */
+
+    rect(-45, -325, 85, 25, "#5a3521");
+    rect(-30, -338, 55, 18, "#5a3521");
+
+
+    /* BRAZOS */
+
+    rect(-75, -195, 28, 78, "#3e7e30");
+    rect(45, -195, 28, 78, "#3e7e30");
+
+    /* manitas */
+
+    rect(-80, -120, 38, 20, "#4c9637");
+    rect(47, -120, 38, 20, "#4c9637");
+
+
+    /* PIERNAS */
 
     rect(
-        -40,
-        -300,
-        80,
-        20,
-        "#59351f"
-    );
-
-
-    /* ojos */
-
-    rect(
-        -28,
-        -278,
-        18,
-        18,
-        "#111"
-    );
-
-    rect(
-        10,
-        -278,
-        18,
-        18,
-        "#111"
-    );
-
-
-    /* ojos brillantes */
-
-    rect(
-        -23,
-        -274,
-        5,
-        5,
-        "white"
+        -50 + paso,
+        -95,
+        38,
+        100,
+        "#397a2d"
     );
 
     rect(
-        15,
-        -274,
-        5,
-        5,
-        "white"
+        18 - paso,
+        -95,
+        38,
+        100,
+        "#397a2d"
     );
 
 
-    /* brazos */
+    /* PIES */
 
     rect(
-        -70,
-        -180,
-        25,
-        80,
-        "#438431"
-    );
-
-    rect(
-        45,
-        -180,
-        25,
-        80,
-        "#438431"
-    );
-
-
-    /* piernas */
-
-    rect(
-        -45+movimiento,
-        -75,
-        35,
-        85,
-        "#39772e"
-    );
-
-    rect(
-        25-movimiento,
-        -75,
-        35,
-        85,
-        "#39772e"
-    );
-
-
-    /* pies */
-
-    rect(
-        -60+movimiento,
+        -67 + paso,
         0,
-        55,
-        25,
-        "#326727"
+        60,
+        27,
+        "#326a27"
     );
 
     rect(
-        20-movimiento,
+        8 - paso,
         0,
-        55,
-        25,
-        "#326727"
+        60,
+        27,
+        "#326a27"
     );
 
 
-    /* placas */
+    /* GARRITAS */
 
-    for(let i=0;i<5;i++){
+    rect(-55 + paso, 25, 12, 8, "#f0e4bf");
+    rect(-38 + paso, 25, 12, 8, "#f0e4bf");
+
+    rect(20 - paso, 25, 12, 8, "#f0e4bf");
+    rect(38 - paso, 25, 12, 8, "#f0e4bf");
+
+
+    /* ESPINAS NARANJAS */
+
+    for (let i = 0; i < 6; i++) {
 
         rect(
-            -95+i*35,
-            -135,
-            18,
-            25,
-            "#c65a32"
+            -100 + i * 28,
+            -155,
+            20,
+            30,
+            "#df7138"
         );
 
     }
 
 
-    /* gorro */
+    /* GORRO DE CUMPLEAÑOS */
 
     rect(
-        -20,
-        -345,
-        55,
-        18,
-        "#e94b4b"
+        -30,
+        -365,
+        65,
+        20,
+        "#ef4d55"
+    );
+
+    rect(
+        -22,
+        -390,
+        50,
+        28,
+        "#fff0df"
     );
 
     rect(
         -10,
-        -365,
-        35,
-        22,
-        "#f6e4e1"
+        -415,
+        28,
+        27,
+        "#ef4d55"
     );
 
     rect(
         0,
-        -382,
-        18,
-        20,
-        "#e94b4b"
+        -432,
+        12,
+        17,
+        "#ffd447"
     );
 
 
     ctx.restore();
-
 }
 
 
-/* =========================================
+/* =====================================================
    PANDA
-========================================= */
+===================================================== */
 
-function dibujarPanda(x,y,s,caminar){
+function dibujarPanda(x, y, escala, caminando) {
 
     ctx.save();
 
-    ctx.translate(x,y);
-    ctx.scale(s,s);
+    ctx.translate(x, y);
+    ctx.scale(escala, escala);
+
+    let paso =
+        caminando
+        ? Math.sin(performance.now() / 100 + 1) * 9
+        : 0;
 
 
-    let movimiento =
-        caminar ?
-        Math.sin(tiempo*.35+1)*9 :
-        0;
-
-
-    /* cuerpo */
+    /* CUERPO DEL PIJAMA */
 
     rect(
-        -45,
-        -175,
-        90,
+        -48,
+        -185,
+        96,
         125,
-        "#f2eee5"
+        "#f4f0e9"
     );
 
 
     /* barriga */
 
     rect(
-        -25,
-        -155,
-        50,
-        85,
-        "#ded9ce"
-    );
-
-
-    /* cabeza */
-
-    rect(
-        -55,
-        -270,
-        110,
-        100,
-        "#eee9df"
-    );
-
-
-    /* orejas */
-
-    rect(
-        -65,
-        -280,
-        30,
-        30,
-        "#191919"
-    );
-
-    rect(
-        35,
-        -280,
-        30,
-        30,
-        "#191919"
-    );
-
-
-    /* manchas */
-
-    rect(
-        -35,
-        -245,
-        30,
-        30,
-        "#252525"
-    );
-
-    rect(
-        5,
-        -245,
-        30,
-        30,
-        "#252525"
-    );
-
-
-    /* ojos */
-
-    rect(
         -27,
-        -237,
-        12,
-        12,
-        "#111"
-    );
-
-    rect(
-        15,
-        -237,
-        12,
-        12,
-        "#111"
+        -165,
+        54,
+        90,
+        "#ded8cf"
     );
 
 
-    /* nariz */
+    /* CABEZA */
 
     rect(
-        -7,
-        -218,
-        14,
-        10,
-        "#222"
+        -62,
+        -285,
+        124,
+        105,
+        "#f1eee7"
     );
 
 
-    /* cabello */
+    /* OREJAS */
+
+    rect(-72, -290, 35, 38, "#202024");
+    rect(37, -290, 35, 38, "#202024");
+
+
+    /* MANCHAS OJOS */
+
+    rect(-45, -260, 38, 34, "#29292d");
+    rect(7, -260, 38, 34, "#29292d");
+
+
+    /* OJOS */
+
+    rect(-31, -250, 12, 12, "#ffffff");
+    rect(19, -250, 12, 12, "#ffffff");
+
+    rect(-27, -247, 8, 8, "#111111");
+    rect(20, -247, 8, 8, "#111111");
+
+
+    /* NARIZ */
+
+    rect(-8, -222, 16, 12, "#27242a");
+
+
+    /* SONRISA */
+
+    rect(-17, -208, 34, 6, "#34252a");
+
+
+    /* CABELLO CAFÉ */
+
+    rect(-35, -285, 70, 22, "#623b25");
+    rect(-20, -298, 42, 17, "#623b25");
+
+
+    /* BRAZOS */
 
     rect(
-        -30,
-        -270,
-        60,
-        18,
-        "#563522"
-    );
-
-
-    /* brazos */
-
-    rect(
-        -55,
-        -155,
-        25,
-        75,
-        "#191919"
+        -58,
+        -165,
+        28,
+        80,
+        "#222225"
     );
 
     rect(
         30,
-        -155,
+        -165,
+        28,
+        80,
+        "#222225"
+    );
+
+
+    /* MANOS */
+
+    rect(-62, -92, 38, 20, "#f1eee7");
+    rect(30, -92, 38, 20, "#f1eee7");
+
+
+    /* PIERNAS */
+
+    rect(
+        -42 + paso,
+        -75,
+        34,
+        78,
+        "#222225"
+    );
+
+    rect(
+        10 - paso,
+        -75,
+        34,
+        78,
+        "#222225"
+    );
+
+
+    /* PIES */
+
+    rect(
+        -52 + paso,
+        0,
+        48,
         25,
-        75,
-        "#191919"
-    );
-
-
-    /* piernas */
-
-    rect(
-        -38+movimiento,
-        -60,
-        32,
-        65,
-        "#191919"
+        "#18181b"
     );
 
     rect(
-        10-movimiento,
-        -60,
-        32,
-        65,
-        "#191919"
+        5 - paso,
+        0,
+        48,
+        25,
+        "#18181b"
     );
 
 
-    /* gorro */
+    /* COLITA */
+
+    rect(
+        42,
+        -120,
+        24,
+        24,
+        "#ffffff"
+    );
+
+    rect(
+        60,
+        -112,
+        18,
+        18,
+        "#222225"
+    );
+
+
+    /* GORRO */
+
+    rect(
+        -34,
+        -318,
+        68,
+        20,
+        "#9b67d3"
+    );
 
     rect(
         -25,
-        -305,
-        55,
-        18,
-        "#8e65c9"
+        -345,
+        50,
+        29,
+        "#f4eaf8"
     );
 
     rect(
-        -15,
-        -325,
-        35,
-        22,
-        "#f4eee8"
+        -12,
+        -370,
+        27,
+        27,
+        "#9b67d3"
     );
 
     rect(
-        -5,
-        -342,
-        15,
-        20,
-        "#8e65c9"
+        -2,
+        -387,
+        12,
+        17,
+        "#ffd447"
     );
 
 
     ctx.restore();
-
 }
 
 
-/* =========================================
-   CONFETI
-========================================= */
+/* =====================================================
+   PASTEL
+===================================================== */
 
-function crearConfeti(){
+function dibujarPastel() {
 
-    for(let i=0;i<100;i++){
+    let x = W / 2;
+    let y = H * .72;
 
-        confeti.push({
+    /* sombra */
 
-            x:Math.random()*W,
+    rect(
+        x - 105,
+        y + 58,
+        210,
+        15,
+        "rgba(0,0,0,.25)"
+    );
 
-            y:-Math.random()*H,
 
-            velocidad:2+Math.random()*4,
+    /* plato */
 
-            rotacion:Math.random()*360,
+    rect(
+        x - 100,
+        y + 40,
+        200,
+        18,
+        "#eee7df"
+    );
 
-            tamaño:6+Math.random()*8,
 
-            color:[
-                "#e74c3c",
-                "#f1c40f",
-                "#3498db",
-                "#9b59b6",
-                "#2ecc71",
-                "#ffffff"
-            ][Math.floor(Math.random()*6)]
+    /* pastel */
 
-        });
+    rect(
+        x - 82,
+        y - 15,
+        164,
+        60,
+        "#fff0dc"
+    );
+
+
+    /* crema */
+
+    rect(
+        x - 82,
+        y - 15,
+        164,
+        20,
+        "#ff91b8"
+    );
+
+
+    /* detalles */
+
+    for (let i = 0; i < 6; i++) {
+
+        rect(
+            x - 70 + i * 28,
+            y + 12,
+            12,
+            13,
+            "#ff91b8"
+        );
 
     }
 
+
+    /* vela */
+
+    rect(
+        x - 8,
+        y - 45,
+        16,
+        32,
+        "#8e68d4"
+    );
+
+
+    /* llama */
+
+    let fuego =
+        Math.sin(performance.now() / 80) * 3;
+
+    rect(
+        x - 7 + fuego,
+        y - 62,
+        14,
+        18,
+        "#ffd447"
+    );
+
+    rect(
+        x - 3 + fuego,
+        y - 67,
+        7,
+        10,
+        "#fff3a3"
+    );
+
 }
 
 
-function dibujarConfeti(){
+/* =====================================================
+   CONFETI
+===================================================== */
 
-    confeti.forEach(c=>{
+function crearConfeti() {
 
-        c.y+=c.velocidad;
-        c.rotacion+=5;
+    for (let i = 0; i < 100; i++) {
 
-        if(c.y>H){
+        confeti.push({
 
-            c.y=-20;
-            c.x=Math.random()*W;
+            x: Math.random() * W,
+            y: -Math.random() * H,
 
+            velocidad:
+                2 + Math.random() * 3,
+
+            tamaño:
+                5 + Math.random() * 7,
+
+            rotacion:
+                Math.random() * 360,
+
+            color: [
+                "#ff6b81",
+                "#ffd447",
+                "#7dc8ff",
+                "#b58bea",
+                "#ffffff",
+                "#74d99b"
+            ][Math.floor(Math.random() * 6)]
+
+        });
+    }
+}
+
+
+function dibujarConfeti() {
+
+    confeti.forEach(c => {
+
+        c.y += c.velocidad;
+        c.rotacion += 5;
+
+        if (c.y > H + 20) {
+            c.y = -20;
+            c.x = Math.random() * W;
         }
 
         ctx.save();
 
-        ctx.translate(c.x,c.y);
+        ctx.translate(c.x, c.y);
 
-        ctx.rotate(c.rotacion*Math.PI/180);
+        ctx.rotate(
+            c.rotacion * Math.PI / 180
+        );
 
         rect(
-            -c.tamaño/2,
-            -c.tamaño/2,
+            -c.tamaño / 2,
+            -c.tamaño / 2,
             c.tamaño,
-            c.tamaño*1.6,
+            c.tamaño * 1.5,
             c.color
         );
 
         ctx.restore();
 
     });
-
 }
 
 
-/* =========================================
-   CORAZONES
-========================================= */
+/* =====================================================
+   CORAZONES Y ESTRELLAS
+===================================================== */
 
-function crearCorazones(){
+function dibujarEstrellas() {
 
-    for(let i=0;i<20;i++){
+    let ahora = performance.now();
 
-        corazones.push({
+    for (let i = 0; i < 8; i++) {
 
-            x:W/2+(Math.random()-.5)*250,
+        let x = W * .2 + i * W * .085;
+        let y = H * .22 + Math.sin(ahora / 500 + i) * 12;
 
-            y:H*.48,
+        ctx.font = "22px Arial";
 
-            vida:100,
+        ctx.textAlign = "center";
 
-            velocidad:1+Math.random()*2
+        ctx.fillStyle = "#fff4b0";
 
-        });
+        ctx.fillText("✦", x, y);
 
     }
-
 }
 
 
-function dibujarCorazones(){
+/* =====================================================
+   TEXTO FINAL
+===================================================== */
 
-    corazones.forEach(c=>{
+function dibujarMensajeFinal() {
 
-        c.y-=c.velocidad;
-        c.vida--;
+    const ahora = performance.now();
 
-        ctx.font="25px Arial";
-
-        ctx.fillStyle="#ff4f81";
-
-        ctx.fillText(
-            "♥",
-            c.x,
-            c.y
-        );
-
-    });
-
-    corazones=
-        corazones.filter(c=>c.vida>0);
-
-}
+    if (ahora - inicio < 7200) return;
 
 
-/* =========================================
-   TEXTO
-========================================= */
-
-function textoFinal(){
-
-    if(fase!=="final")
-        return;
-
-
-    ctx.textAlign="center";
-
-    ctx.font=
-        "900 clamp(35px,7vw,80px) Arial";
-
-    ctx.lineWidth=10;
-
-    ctx.strokeStyle="#111";
-
-    ctx.strokeText(
-        "¡FELIZ CUMPLEAÑOS T-REX!",
-        W/2,
-        H*.82
-    );
-
-    ctx.fillStyle="#ffd83d";
-
-    ctx.fillText(
-        "¡FELIZ CUMPLEAÑOS T-REX!",
-        W/2,
-        H*.82
-    );
-
-
-    ctx.font=
-        "bold 20px Arial";
-
-    ctx.fillStyle="white";
-
-    ctx.fillText(
-        "Que este nuevo nivel esté lleno de aventuras ❤️",
-        W/2,
-        H*.89
-    );
-
-}
-
-
-/* =========================================
-   ANIMACIÓN
-========================================= */
-
-function actualizar(){
-
-    tiempo++;
-
-
-    if(fase==="inicio"){
-
-        trex.y=H*.65;
-        panda.y=H*.65;
-
-        trex.x+=trex.velocidad;
-
-        if(trex.x>W*.43){
-
-            fase="panda";
-
-        }
-
-    }
-
-
-    else if(fase==="panda"){
-
-        panda.y=H*.65;
-
-        panda.x-=panda.velocidad;
-
-        if(panda.x<W*.57){
-
-            fase="abrazo";
-
-            crearCorazones();
-
-        }
-
-    }
-
-
-    else if(fase==="abrazo"){
-
-        trex.y=H*.65;
-        panda.y=H*.65;
-
-        if(tiempo%180===0){
-
-            fase="final";
-
-            crearConfeti();
-
-        }
-
-    }
-
-}
-
-
-/* =========================================
-   DIBUJAR
-========================================= */
-
-function dibujar(){
-
-    fondo();
-
-
-    if(fase==="inicio"){
-
-        dibujarTrex(
-            trex.x,
-            trex.y,
+    let progreso =
+        Math.min(
             1,
-            true
+            (ahora - inicio - 7200) / 900
         );
+
+
+    ctx.globalAlpha = progreso;
+
+
+    texto(
+        "🎉 ¡FELIZ CUMPLEAÑOS! 🎉",
+        W / 2,
+        H * .13,
+        Math.min(42, W / 16),
+        "#ffffff"
+    );
+
+
+    texto(
+        "🦖 T-REX 🦖",
+        W / 2,
+        H * .21,
+        Math.min(60, W / 10),
+        "#ffd447"
+    );
+
+
+    ctx.globalAlpha = 1;
+}
+
+
+/* =====================================================
+   ACTUALIZAR ANIMACIÓN
+===================================================== */
+
+function actualizar() {
+
+    const ahora = performance.now();
+    const segundos = (ahora - inicio) / 1000;
+
+
+    /*
+       T-REX CAMINA
+       0 - 3.5 segundos
+    */
+
+    if (segundos < 3.5) {
+
+        let progreso =
+            Math.min(1, segundos / 3.5);
+
+        trex.x =
+            -180 +
+            (W * .43 + 180) * progreso;
 
     }
 
 
-    else if(fase==="panda"){
+    /*
+       PANDA CAMINA
+       2 - 5.5 segundos
+    */
 
-        dibujarTrex(
-            trex.x,
-            trex.y,
-            1,
-            false
-        );
+    if (segundos > 2) {
+
+        let progreso =
+            Math.min(
+                1,
+                (segundos - 2) / 3.5
+            );
+
+        panda.x =
+            W + 150 -
+            (W * .43 + 150) * progreso;
+
+    }
+
+
+    /*
+       A PARTIR DE 5.5 SEGUNDOS
+       LOS DOS SE QUEDAN JUNTOS
+    */
+
+    if (segundos >= 5.5) {
+
+        trex.x = W * .43;
+        panda.x = W * .57;
+
+    }
+
+
+    /*
+       CONFETI
+    */
+
+    if (
+        segundos >= 5.5 &&
+        confeti.length === 0
+    ) {
+
+        crearConfeti();
+
+    }
+
+}
+
+
+/* =====================================================
+   DIBUJAR ESCENA
+===================================================== */
+
+function dibujar() {
+
+    dibujarFondo();
+
+    dibujarEstrellas();
+
+
+    const ahora = performance.now();
+    const segundos = (ahora - inicio) / 1000;
+
+
+    /*
+       T-REX
+    */
+
+    dibujarTrex(
+        trex.x,
+        H * .70,
+        trex.escala,
+        segundos < 3.5
+    );
+
+
+    /*
+       PANDA
+    */
+
+    if (segundos >= 2) {
 
         dibujarPanda(
             panda.x,
-            panda.y,
-            .78,
-            true
+            H * .70,
+            panda.escala,
+            segundos < 5.5
         );
 
     }
 
 
-    else{
+    /*
+       PASTEL
+       Aparece después de que llegan
+    */
 
-        dibujarTrex(
-            W*.45,
-            H*.65,
-            1,
-            false
-        );
+    if (segundos >= 5.5) {
 
-        dibujarPanda(
-            W*.55,
-            H*.65,
-            .78,
-            false
-        );
-
-        dibujarCorazones();
-
-    }
-
-
-    if(fase==="final"){
+        dibujarPastel();
 
         dibujarConfeti();
 
     }
 
 
-    textoFinal();
+    /*
+       MENSAJE
+    */
+
+    dibujarMensajeFinal();
+
+
+    /*
+       REINICIAR AUTOMÁTICAMENTE
+       después de 11 segundos
+    */
+
+    if (segundos >= 11) {
+
+        inicio = performance.now();
+
+        confeti = [];
+
+        trex.x = -180;
+        panda.x = W + 150;
+
+    }
 
 }
 
 
-/* =========================================
+/* =====================================================
    LOOP
-========================================= */
+===================================================== */
 
-function loop(){
+function loop() {
 
     actualizar();
 
