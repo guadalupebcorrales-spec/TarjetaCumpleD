@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feliz Cumpleaños T-Rex 🦖</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at top, #6c4bc5, #17134a 70%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* Pantalla inicial */
+
+#inicio {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background:
+        linear-gradient(135deg, #10104b, #38238a, #d33c63);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: opacity 1s ease;
+}
+
+#inicio h1 {
+    font-size: clamp(35px, 7vw, 80px);
+    margin-bottom: 20px;
+    text-shadow:
+        4px 4px 0 #000,
+        0 0 25px rgba(255,255,255,.5);
+}
+
+#inicio p {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+#comenzar {
+    border: 0;
+    padding: 16px 35px;
+    border-radius: 12px;
+    background: #ffd83d;
+    color: #261700;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 7px 0 #a87900;
+    transition: .15s;
+}
+
+#comenzar:hover {
+    transform: translateY(-3px);
+}
+
+#comenzar:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #a87900;
+}
+
+/* Escena */
+
+.escena {
+    position: relative;
+    width: min(1100px, 96vw);
+    height: min(700px, 94vh);
+    overflow: hidden;
+    border-radius: 25px;
+    border: 7px solid white;
+    box-shadow:
+        0 0 50px rgba(0,0,0,.7),
+        inset 0 0 50px rgba(0,0,0,.4);
+    background: #5c42bd;
+    transform: scale(.9);
+    opacity: 0;
+    transition: 1.5s ease;
+}
+
+.escena.activa {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Imagen */
+
+.fondo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: respiracion 8s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes respiracion {
+
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.035);
+    }
+}
+
+/* Oscurecimiento */
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(0,0,0,.05),
+            rgba(0,0,0,.05) 55%,
+            rgba(0,0,0,.6)
+        );
+    pointer-events: none;
+}
+
+/* Texto */
+
+.mensaje {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    width: 90%;
+    text-align: center;
+    opacity: 0;
+    animation: aparecerMensaje 2s ease forwards;
+    animation-delay: 5s;
+}
+
+.mensaje h2 {
+    font-size: clamp(35px, 6vw, 75px);
+    font-weight: 900;
+    letter-spacing: 2px;
+
+    color: #ffd83d;
+
+    text-shadow:
+        5px 5px 0 #a72c1c,
+        8px 8px 0 #111,
+        0 0 25px rgba(255,255,255,.5);
+}
+
+.mensaje p {
+    margin-top: 12px;
+    font-size: clamp(15px, 2vw, 23px);
+    font-weight: bold;
+    text-shadow: 2px 2px 4px black;
+}
+
+@keyframes aparecerMensaje {
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Confeti */
+
+.confeti {
+    position: absolute;
+    width: 12px;
+    height: 20px;
+    top: -30px;
+    z-index: 20;
+    animation: caer linear infinite;
+}
+
+@keyframes caer {
+
+    0% {
+        transform:
+            translateY(-40px)
+            rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform:
+            translateY(800px)
+            rotate(720deg);
+        opacity: .8;
+    }
+}
+
+/* Estrellas */
+
+.estrella {
+    position: absolute;
+    z-index: 15;
+    color: white;
+    font-size: 25px;
+    animation:
+        brillo 1.8s ease-in-out infinite,
+        flotar 4s ease-in-out infinite;
+}
+
+@keyframes brillo {
+
+    0%,100% {
+        opacity: .2;
+        transform: scale(.7);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.3);
+    }
+}
+
+@keyframes flotar {
+
+    0%,100% {
+        margin-top: 0;
+    }
+
+    50% {
+        margin-top: -15px;
+    }
+}
+
+/* Botón */
+
+.boton-musica {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 50;
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+    border: 2px solid white;
+
+    background: rgba(0,0,0,.45);
+    color: white;
+
+    font-size: 20px;
+    cursor: pointer;
+
+    backdrop-filter: blur(5px);
+}
+
+/* Texto inferior */
+
+.firma {
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    font-size: 12px;
+    opacity: .7;
+    z-index: 40;
+}
+
+/* Móvil */
+
+@media(max-width:600px) {
+
+    .escena {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        border: 0;
+    }
+
+    .mensaje {
+        bottom: 30px;
+    }
+
+    .mensaje h2 {
+        font-size: 36px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PANTALLA DE INICIO -->
+
+<div id="inicio">
+
+    <h1>🦖🎂</h1>
+
+    <h1>Una sorpresa para ti...</h1>
+
+    <p>
+        Presiona el botón para comenzar tu aventura
+    </p>
+
+    <button id="comenzar">
+        ⭐ COMENZAR ⭐
+    </button>
+
+</div>
+
+
+<!-- ESCENA PRINCIPAL -->
+
+<div class="escena" id="escena">
+
+    <img
+        src="tarjeta.png"
+        class="fondo"
+        alt="Feliz cumpleaños"
+    >
+
+    <div class="overlay"></div>
+
+
+    <!-- Estrellas -->
+
+    <div class="estrella" style="left:8%; top:15%;">✨</div>
+    <div class="estrella" style="left:25%; top:10%; animation-delay:.5s;">⭐</div>
+    <div class="estrella" style="right:15%; top:17%; animation-delay:1s;">✨</div>
+    <div class="estrella" style="right:8%; top:35%; animation-delay:1.5s;">⭐</div>
+
+
+    <!-- Mensaje final -->
+
+    <div class="mensaje">
+
+        <h2>
+            🎉 ¡FELIZ CUMPLEAÑOS T-REX! 🦖
+        </h2>
+
+        <p>
+            Que este nuevo nivel esté lleno de aventuras,
+            risas y momentos increíbles.
+            🇲🇽 ❤️ 🇨🇴
+        </p>
+
+    </div>
+
+
+    <!-- Botón música -->
+
+    <button
+        class="boton-musica"
+        id="musicaBtn"
+        title="Música">
+        🔊
+    </button>
+
+    <div class="firma">
+        Press Start ✦ Level Up!
+    </div>
+
+</div>
+
+
+<!-- Música opcional -->
+
+<audio id="musica" loop>
+    <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+
+<script>
+
+/* INICIAR TARJETA */
+
+const inicio = document.getElementById("inicio");
+const escena = document.getElementById("escena");
+
+document.getElementById("comenzar").addEventListener("click", () => {
+
+    inicio.style.opacity = "0";
+
+    setTimeout(() => {
+
+        inicio.style.display = "none";
+
+        escena.classList.add("activa");
+
+        crearConfeti();
+
+        iniciarMusica();
+
+    }, 800);
+
+});
+
+
+/* CONFETI */
+
+function crearConfeti() {
+
+    const colores = [
+        "#e63946",
+        "#ffd83d",
+        "#2d9cdb",
+        "#27ae60",
+        "#ffffff"
+    ];
+
+    for(let i = 0; i < 90; i++) {
+
+        const pieza = document.createElement("div");
+
+        pieza.classList.add("confeti");
+
+        pieza.style.left =
+            Math.random() * 100 + "%";
+
+        pieza.style.animationDuration =
+            (3 + Math.random() * 5) + "s";
+
+        pieza.style.animationDelay =
+            Math.random() * 5 + "s";
+
+        pieza.style.background =
+            colores[
+                Math.floor(
+                    Math.random() * colores.length
+                )
+            ];
+
+        pieza.style.transform =
+            `rotate(${Math.random()*360}deg)`;
+
+        escena.appendChild(pieza);
+    }
+
+}
+
+
+/* MÚSICA */
+
+const musica =
+    document.getElementById("musica");
+
+const musicaBtn =
+    document.getElementById("musicaBtn");
+
+let reproduciendo = false;
+
+function iniciarMusica() {
+
+    musica.volume = .35;
+
+    musica.play()
+        .then(() => {
+
+            reproduciendo = true;
+            musicaBtn.textContent = "🔊";
+
+        })
+        .catch(() => {
+
+            musicaBtn.textContent = "🔇";
+
+        });
+
+}
+
+musicaBtn.addEventListener("click", () => {
+
+    if(reproduciendo) {
+
+        musica.pause();
+
+        reproduciendo = false;
+
+        musicaBtn.textContent = "🔇";
+
+    } else {
+
+        musica.play();
+
+        reproduciendo = true;
+
+        musicaBtn.textContent = "🔊";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
