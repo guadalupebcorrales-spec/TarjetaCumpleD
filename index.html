@@ -3,237 +3,286 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎂 Feliz Cumpleaños T-Rex 🦖</title>
+
+<title>Feliz Cumpleaños T-Rex</title>
 
 <style>
-* {
+
+html, body {
     margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #19152e;
 }
 
 body {
-    overflow: hidden;
-    background: #17132f;
     font-family: Arial, sans-serif;
 }
 
 canvas {
     display: block;
-    width: 100vw;
-    height: 100vh;
-    image-rendering: pixelated;
+    width: 100%;
+    height: 100%;
 }
+
+#mensaje {
+    position: fixed;
+    top: 8%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+
+    color: #fff;
+
+    font-size: clamp(25px, 5vw, 65px);
+    font-weight: 900;
+
+    text-shadow:
+        4px 4px 0 #29203e,
+        -2px -2px 0 #29203e,
+        2px -2px 0 #29203e,
+        -2px 2px 0 #29203e;
+
+    opacity: 0;
+
+    transform: scale(.7);
+
+    transition:
+        opacity .8s ease,
+        transform .8s ease;
+
+    pointer-events: none;
+
+    z-index: 10;
+}
+
+#mensaje.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.subtitulo {
+    display: block;
+
+    margin-top: 8px;
+
+    font-size: clamp(14px, 2vw, 24px);
+
+    font-weight: 600;
+
+    color: #ffe9b0;
+}
+
 </style>
 </head>
 
 <body>
 
-<canvas id="canvas"></canvas>
+<div id="mensaje">
+    🎉 ¡FELIZ CUMPLEAÑOS! 🎉
+    <span class="subtitulo">🦖 T-REX 🦖</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
 
 <script>
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+/* =====================================================
+   ESCENA
+===================================================== */
 
-let W, H;
+const scene = new THREE.Scene();
 
-function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-}
+scene.background = new THREE.Color(0x7563a5);
 
-resize();
-window.addEventListener("resize", resize);
+scene.fog = new THREE.Fog(
+    0x7563a5,
+    18,
+    42
+);
 
 
 /* =====================================================
-   VARIABLES
+   CÁMARA
 ===================================================== */
 
-let inicio = performance.now();
+const camera = new THREE.PerspectiveCamera(
+    42,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
+);
 
-let trex = {
-    x: -180,
-    destino: 0,
-    escala: 1
-};
+camera.position.set(
+    0,
+    5.4,
+    18
+);
 
-let panda = {
-    x: 0,
-    destino: 0,
-    escala: 0.78
-};
-
-let confeti = [];
-
-let estrellas = [];
+camera.lookAt(
+    0,
+    3,
+    0
+);
 
 
 /* =====================================================
-   FUNCIONES BÁSICAS
+   RENDER
 ===================================================== */
 
-function rect(x, y, w, h, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(
-        Math.round(x),
-        Math.round(y),
-        Math.round(w),
-        Math.round(h)
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: false
+    });
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+renderer.setPixelRatio(1);
+
+renderer.shadowMap.enabled = true;
+
+renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
+document.body.appendChild(
+    renderer.domElement
+);
+
+
+/* =====================================================
+   LUCES
+===================================================== */
+
+const luzAmbiente =
+    new THREE.HemisphereLight(
+        0xffe7d0,
+        0x53694c,
+        2.5
     );
-}
+
+scene.add(luzAmbiente);
 
 
-function texto(txt, x, y, tamaño, color, sombra = true) {
+const luzPrincipal =
+    new THREE.DirectionalLight(
+        0xffffff,
+        3
+    );
 
-    ctx.textAlign = "center";
-    ctx.font = `900 ${tamaño}px Arial`;
+luzPrincipal.position.set(
+    -8,
+    15,
+    10
+);
 
-    if (sombra) {
-        ctx.fillStyle = "#17131f";
-        ctx.fillText(txt, x + 4, y + 4);
-    }
+luzPrincipal.castShadow = true;
 
-    ctx.fillStyle = color;
-    ctx.fillText(txt, x, y);
-}
+scene.add(luzPrincipal);
 
 
 /* =====================================================
-   FONDO
+   MATERIALES
 ===================================================== */
 
-function dibujarFondo() {
+function material(color) {
 
-    const cielo = ctx.createLinearGradient(0, 0, 0, H);
+    return new THREE.MeshLambertMaterial({
+        color: color
+    });
 
-    cielo.addColorStop(0, "#282052");
-    cielo.addColorStop(0.45, "#7158a8");
-    cielo.addColorStop(0.72, "#d78c9b");
-    cielo.addColorStop(1, "#f5c58c");
+}
 
-    ctx.fillStyle = cielo;
-    ctx.fillRect(0, 0, W, H);
+const verdeTrex =
+    material(0x4f9a42);
+
+const verdeOscuro =
+    material(0x34742e);
+
+const barrigaTrex =
+    material(0xb8b45e);
+
+const naranja =
+    material(0xe67b3f);
+
+const dientes =
+    material(0xfff2d2);
+
+const cabelloCafe =
+    material(0x5b3825);
+
+const negro =
+    material(0x19191c);
+
+const blanco =
+    material(0xf2eee7);
+
+const pandaGris =
+    material(0xd9d4ca);
+
+const rosa =
+    material(0xff91b8);
+
+const morado =
+    material(0x9c68d4);
+
+const amarillo =
+    material(0xffd447);
+
+const rojo =
+    material(0xef5261);
+
+const pastel =
+    material(0xffeee0);
+
+const crema =
+    material(0xff91b8);
 
 
-    /* Luna */
+/* =====================================================
+   CUBO VOXEL
+===================================================== */
 
-    ctx.fillStyle = "#fff3c4";
+function cubo(
+    parent,
+    x,
+    y,
+    z,
+    sx,
+    sy,
+    sz,
+    mat
+) {
 
-    ctx.beginPath();
-    ctx.arc(
-        W * 0.82,
-        H * 0.17,
-        42,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
-
-
-    /* Estrellas */
-
-    for (let i = 0; i < 35; i++) {
-
-        let x = (i * 173) % W;
-        let y = (i * 83) % (H * .45);
-
-        let brillo =
-            0.45 +
-            Math.sin(performance.now() / 500 + i) * .3;
-
-        rect(
-            x,
-            y,
-            4,
-            4,
-            `rgba(255,255,255,${brillo})`
+    const geometria =
+        new THREE.BoxGeometry(
+            sx,
+            sy,
+            sz
         );
-    }
 
+    const objeto =
+        new THREE.Mesh(
+            geometria,
+            mat
+        );
 
-    /* Montañas */
-
-    ctx.fillStyle = "#4c536c";
-
-    ctx.beginPath();
-
-    ctx.moveTo(0, H * .62);
-    ctx.lineTo(W * .17, H * .38);
-    ctx.lineTo(W * .32, H * .62);
-    ctx.lineTo(W * .50, H * .34);
-    ctx.lineTo(W * .70, H * .62);
-    ctx.lineTo(W * .86, H * .40);
-    ctx.lineTo(W, H * .62);
-
-    ctx.fill();
-
-
-    /* Colinas */
-
-    ctx.fillStyle = "#407449";
-
-    ctx.beginPath();
-
-    ctx.moveTo(0, H * .62);
-    ctx.quadraticCurveTo(
-        W * .25,
-        H * .50,
-        W * .50,
-        H * .63
+    objeto.position.set(
+        x,
+        y,
+        z
     );
 
-    ctx.quadraticCurveTo(
-        W * .75,
-        H * .52,
-        W,
-        H * .62
-    );
+    objeto.castShadow = true;
 
-    ctx.lineTo(W, H);
-    ctx.lineTo(0, H);
-    ctx.fill();
+    objeto.receiveShadow = true;
 
+    parent.add(objeto);
 
-    /* Pasto */
-
-    rect(
-        0,
-        H * .66,
-        W,
-        H * .34,
-        "#3b914d"
-    );
-
-
-    /* Camino */
-
-    ctx.fillStyle = "#c39a68";
-
-    ctx.beginPath();
-
-    ctx.moveTo(W * .32, H);
-    ctx.lineTo(W * .43, H * .64);
-    ctx.lineTo(W * .57, H * .64);
-    ctx.lineTo(W * .68, H);
-
-    ctx.fill();
-
-
-    /* Flores */
-
-    for (let i = 0; i < 15; i++) {
-
-        let x = 30 + (i * 127) % (W - 60);
-        let y = H * .70 + (i % 3) * 35;
-
-        rect(x, y, 5, 12, "#39743e");
-
-        rect(x - 5, y - 5, 8, 8, "#ffb5cf");
-        rect(x + 4, y - 5, 8, 8, "#ffb5cf");
-
-    }
+    return objeto;
 }
 
 
@@ -241,197 +290,452 @@ function dibujarFondo() {
    T-REX
 ===================================================== */
 
-function dibujarTrex(x, y, escala, caminando) {
+function crearTrex() {
 
-    ctx.save();
+    const personaje =
+        new THREE.Group();
 
-    ctx.translate(x, y);
-    ctx.scale(escala, escala);
-
-    let paso =
-        caminando
-        ? Math.sin(performance.now() / 100) * 10
-        : 0;
-
-
-    /* COLA */
-
-    rect(-145, -135, 110, 45, "#3d852f");
-    rect(-180, -120, 65, 30, "#347328");
-
-    rect(-195, -110, 30, 18, "#286322");
+    personaje.userData = {
+        piernas: [],
+        brazos: [],
+        cola: null
+    };
 
 
-    /* CUERPO DEL DISFRAZ */
+    /* CUERPO */
 
-    rect(-65, -230, 125, 145, "#4c9637");
+    cubo(
+        personaje,
+        0,
+        3.2,
+        0,
+        2.2,
+        3.0,
+        1.55,
+        verdeTrex
+    );
 
-    /* barriga */
 
-    rect(-35, -215, 65, 115, "#b5ad55");
+    /* BARRIGA */
 
-    /* manchas */
+    cubo(
+        personaje,
+        0,
+        3.0,
+        -0.83,
+        1.25,
+        2.15,
+        .18,
+        barrigaTrex
+    );
 
-    rect(-55, -205, 18, 20, "#326e29");
-    rect(38, -190, 17, 25, "#326e29");
+
+    /* CABEZA */
+
+    cubo(
+        personaje,
+        0,
+        5.45,
+        0,
+        2.45,
+        1.8,
+        1.65,
+        verdeTrex
+    );
 
 
-    /* CABEZA DEL T-REX */
+    /* HOCICO */
 
-    rect(-75, -330, 145, 115, "#4b9137");
-
-    /* hocico */
-
-    rect(45, -300, 90, 60, "#3e7d30");
-
-    /* parte inferior de mandíbula */
-
-    rect(55, -245, 75, 25, "#2d5428");
+    cubo(
+        personaje,
+        1.15,
+        5.05,
+        0,
+        1.55,
+        .85,
+        1.5,
+        verdeOscuro
+    );
 
 
     /* BOCA */
 
-    rect(50, -252, 82, 15, "#1c1820");
+    cubo(
+        personaje,
+        1.48,
+        4.72,
+        0,
+        .95,
+        .18,
+        1.32,
+        negro
+    );
 
 
     /* DIENTES */
 
-    for (let i = 0; i < 6; i++) {
+    for (
+        let i = 0;
+        i < 5;
+        i++
+    ) {
 
-        rect(
-            54 + i * 13,
-            -252,
-            8,
-            16,
-            "#fff4d2"
+        cubo(
+            personaje,
+            1.1 + i * .22,
+            4.84,
+            -.55,
+            .12,
+            .25,
+            .12,
+            dientes
         );
+
+        cubo(
+            personaje,
+            1.1 + i * .22,
+            4.84,
+            .55,
+            .12,
+            .25,
+            .12,
+            dientes
+        );
+
     }
 
 
     /* OJOS */
 
-    rect(-35, -298, 24, 22, "#171717");
-    rect(10, -298, 24, 22, "#171717");
+    cubo(
+        personaje,
+        -.55,
+        5.8,
+        -.76,
+        .32,
+        .32,
+        .15,
+        negro
+    );
 
-    rect(-28, -294, 7, 7, "#ffffff");
-    rect(17, -294, 7, 7, "#ffffff");
+    cubo(
+        personaje,
+        -.55,
+        5.8,
+        .76,
+        .32,
+        .32,
+        .15,
+        negro
+    );
 
 
-    /* CABELLO CAFÉ */
+    /* BRILLO OJOS */
 
-    rect(-45, -325, 85, 25, "#5a3521");
-    rect(-30, -338, 55, 18, "#5a3521");
+    cubo(
+        personaje,
+        -.62,
+        5.88,
+        -.84,
+        .09,
+        .09,
+        .05,
+        blanco
+    );
+
+    cubo(
+        personaje,
+        -.62,
+        5.88,
+        .84,
+        .09,
+        .09,
+        .05,
+        blanco
+    );
+
+
+    /* CABELLO */
+
+    cubo(
+        personaje,
+        -.15,
+        6.35,
+        0,
+        1.55,
+        .35,
+        1.2,
+        cabelloCafe
+    );
+
+
+    cubo(
+        personaje,
+        -.65,
+        6.48,
+        0,
+        .6,
+        .25,
+        .9,
+        cabelloCafe
+    );
 
 
     /* BRAZOS */
 
-    rect(-75, -195, 28, 78, "#3e7e30");
-    rect(45, -195, 28, 78, "#3e7e30");
+    const brazoIzq =
+        cubo(
+            personaje,
+            -1.35,
+            3.65,
+            0,
+            .45,
+            1.45,
+            .5,
+            verdeOscuro
+        );
 
-    /* manitas */
+    const brazoDer =
+        cubo(
+            personaje,
+            1.35,
+            3.65,
+            0,
+            .45,
+            1.45,
+            .5,
+            verdeOscuro
+        );
 
-    rect(-80, -120, 38, 20, "#4c9637");
-    rect(47, -120, 38, 20, "#4c9637");
+    personaje.userData.brazos.push(
+        brazoIzq,
+        brazoDer
+    );
+
+
+    /* MANOS */
+
+    cubo(
+        personaje,
+        -1.35,
+        2.82,
+        0,
+        .6,
+        .38,
+        .65,
+        verdeTrex
+    );
+
+    cubo(
+        personaje,
+        1.35,
+        2.82,
+        0,
+        .6,
+        .38,
+        .65,
+        verdeTrex
+    );
 
 
     /* PIERNAS */
 
-    rect(
-        -50 + paso,
-        -95,
-        38,
-        100,
-        "#397a2d"
-    );
+    const piernaIzq =
+        cubo(
+            personaje,
+            -.58,
+            1.15,
+            0,
+            .65,
+            2.25,
+            .7,
+            verdeOscuro
+        );
 
-    rect(
-        18 - paso,
-        -95,
-        38,
-        100,
-        "#397a2d"
+    const piernaDer =
+        cubo(
+            personaje,
+            .58,
+            1.15,
+            0,
+            .65,
+            2.25,
+            .7,
+            verdeOscuro
+        );
+
+    personaje.userData.piernas.push(
+        piernaIzq,
+        piernaDer
     );
 
 
     /* PIES */
 
-    rect(
-        -67 + paso,
-        0,
-        60,
-        27,
-        "#326a27"
+    cubo(
+        personaje,
+        -.72,
+        .05,
+        -.15,
+        1.2,
+        .45,
+        1.3,
+        verdeOscuro
     );
 
-    rect(
-        8 - paso,
-        0,
-        60,
-        27,
-        "#326a27"
+    cubo(
+        personaje,
+        .72,
+        .05,
+        -.15,
+        1.2,
+        .45,
+        1.3,
+        verdeOscuro
     );
 
 
-    /* GARRITAS */
+    /* GARRAS */
 
-    rect(-55 + paso, 25, 12, 8, "#f0e4bf");
-    rect(-38 + paso, 25, 12, 8, "#f0e4bf");
+    cubo(
+        personaje,
+        -.85,
+        -.05,
+        -.85,
+        .35,
+        .2,
+        .35,
+        dientes
+    );
 
-    rect(20 - paso, 25, 12, 8, "#f0e4bf");
-    rect(38 - paso, 25, 12, 8, "#f0e4bf");
+    cubo(
+        personaje,
+        .85,
+        -.05,
+        -.85,
+        .35,
+        .2,
+        .35,
+        dientes
+    );
 
 
-    /* ESPINAS NARANJAS */
+    /* COLA */
 
-    for (let i = 0; i < 6; i++) {
+    const cola =
+        new THREE.Group();
 
-        rect(
-            -100 + i * 28,
-            -155,
-            20,
-            30,
-            "#df7138"
+    cola.position.set(
+        -1.15,
+        2.8,
+        0
+    );
+
+    personaje.add(cola);
+
+    personaje.userData.cola = cola;
+
+
+    cubo(
+        cola,
+        -1.25,
+        0,
+        0,
+        2.7,
+        .85,
+        .85,
+        verdeOscuro
+    );
+
+    cubo(
+        cola,
+        -2.75,
+        -.05,
+        0,
+        1.5,
+        .55,
+        .55,
+        verdeOscuro
+    );
+
+
+    /* ESPINAS */
+
+    for (
+        let i = 0;
+        i < 7;
+        i++
+    ) {
+
+        cubo(
+            personaje,
+            -1.05 + i * .4,
+            4.65,
+            0,
+            .35,
+            .5,
+            .5,
+            naranja
         );
 
     }
 
 
-    /* GORRO DE CUMPLEAÑOS */
+    /* GORRO */
 
-    rect(
-        -30,
-        -365,
-        65,
-        20,
-        "#ef4d55"
-    );
+    const gorro =
+        new THREE.Group();
 
-    rect(
-        -22,
-        -390,
-        50,
-        28,
-        "#fff0df"
-    );
+    gorro.position.y = 6.65;
 
-    rect(
-        -10,
-        -415,
-        28,
-        27,
-        "#ef4d55"
-    );
+    personaje.add(gorro);
 
-    rect(
+    cubo(
+        gorro,
         0,
-        -432,
-        12,
-        17,
-        "#ffd447"
+        0,
+        0,
+        1.4,
+        .25,
+        1.25,
+        rojo
+    );
+
+    cubo(
+        gorro,
+        0,
+        .35,
+        0,
+        1.0,
+        .5,
+        .9,
+        blanco
+    );
+
+    cubo(
+        gorro,
+        0,
+        .75,
+        0,
+        .55,
+        .4,
+        .55,
+        rojo
+    );
+
+    cubo(
+        gorro,
+        0,
+        1.05,
+        0,
+        .25,
+        .25,
+        .25,
+        amarillo
     );
 
 
-    ctx.restore();
+    return personaje;
 }
 
 
@@ -439,517 +743,991 @@ function dibujarTrex(x, y, escala, caminando) {
    PANDA
 ===================================================== */
 
-function dibujarPanda(x, y, escala, caminando) {
+function crearPanda() {
 
-    ctx.save();
+    const personaje =
+        new THREE.Group();
 
-    ctx.translate(x, y);
-    ctx.scale(escala, escala);
-
-    let paso =
-        caminando
-        ? Math.sin(performance.now() / 100 + 1) * 9
-        : 0;
+    personaje.userData = {
+        piernas: [],
+        brazos: []
+    };
 
 
-    /* CUERPO DEL PIJAMA */
+    /* CUERPO */
 
-    rect(
-        -48,
-        -185,
-        96,
-        125,
-        "#f4f0e9"
+    cubo(
+        personaje,
+        0,
+        2.6,
+        0,
+        1.75,
+        2.5,
+        1.35,
+        blanco
     );
 
 
-    /* barriga */
+    /* BARRIGA */
 
-    rect(
-        -27,
-        -165,
-        54,
-        90,
-        "#ded8cf"
+    cubo(
+        personaje,
+        0,
+        2.55,
+        -.72,
+        1.05,
+        1.65,
+        .15,
+        pandaGris
     );
 
 
     /* CABEZA */
 
-    rect(
-        -62,
-        -285,
-        124,
-        105,
-        "#f1eee7"
+    cubo(
+        personaje,
+        0,
+        4.55,
+        0,
+        2.0,
+        1.75,
+        1.55,
+        blanco
     );
 
 
     /* OREJAS */
 
-    rect(-72, -290, 35, 38, "#202024");
-    rect(37, -290, 35, 38, "#202024");
+    cubo(
+        personaje,
+        -.75,
+        5.25,
+        0,
+        .55,
+        .55,
+        .55,
+        negro
+    );
+
+    cubo(
+        personaje,
+        .75,
+        5.25,
+        0,
+        .55,
+        .55,
+        .55,
+        negro
+    );
 
 
-    /* MANCHAS OJOS */
+    /* MANCHAS DE OJOS */
 
-    rect(-45, -260, 38, 34, "#29292d");
-    rect(7, -260, 38, 34, "#29292d");
+    cubo(
+        personaje,
+        -.43,
+        4.7,
+        -.76,
+        .55,
+        .65,
+        .15,
+        negro
+    );
+
+    cubo(
+        personaje,
+        .43,
+        4.7,
+        -.76,
+        .55,
+        .65,
+        .15,
+        negro
+    );
 
 
     /* OJOS */
 
-    rect(-31, -250, 12, 12, "#ffffff");
-    rect(19, -250, 12, 12, "#ffffff");
+    cubo(
+        personaje,
+        -.43,
+        4.72,
+        -.87,
+        .16,
+        .16,
+        .08,
+        blanco
+    );
 
-    rect(-27, -247, 8, 8, "#111111");
-    rect(20, -247, 8, 8, "#111111");
+    cubo(
+        personaje,
+        .43,
+        4.72,
+        -.87,
+        .16,
+        .16,
+        .08,
+        blanco
+    );
 
 
     /* NARIZ */
 
-    rect(-8, -222, 16, 12, "#27242a");
+    cubo(
+        personaje,
+        0,
+        4.35,
+        -.88,
+        .28,
+        .2,
+        .12,
+        negro
+    );
 
 
-    /* SONRISA */
+    /* CABELLO */
 
-    rect(-17, -208, 34, 6, "#34252a");
-
-
-    /* CABELLO CAFÉ */
-
-    rect(-35, -285, 70, 22, "#623b25");
-    rect(-20, -298, 42, 17, "#623b25");
+    cubo(
+        personaje,
+        0,
+        5.45,
+        0,
+        1.2,
+        .3,
+        1.0,
+        cabelloCafe
+    );
 
 
     /* BRAZOS */
 
-    rect(
-        -58,
-        -165,
-        28,
-        80,
-        "#222225"
-    );
+    const brazoIzq =
+        cubo(
+            personaje,
+            -1.15,
+            3.0,
+            0,
+            .42,
+            1.35,
+            .45,
+            negro
+        );
 
-    rect(
-        30,
-        -165,
-        28,
-        80,
-        "#222225"
+    const brazoDer =
+        cubo(
+            personaje,
+            1.15,
+            3.0,
+            0,
+            .42,
+            1.35,
+            .45,
+            negro
+        );
+
+    personaje.userData.brazos.push(
+        brazoIzq,
+        brazoDer
     );
 
 
     /* MANOS */
 
-    rect(-62, -92, 38, 20, "#f1eee7");
-    rect(30, -92, 38, 20, "#f1eee7");
+    cubo(
+        personaje,
+        -1.15,
+        2.25,
+        0,
+        .55,
+        .35,
+        .55,
+        blanco
+    );
+
+    cubo(
+        personaje,
+        1.15,
+        2.25,
+        0,
+        .55,
+        .35,
+        .55,
+        blanco
+    );
 
 
     /* PIERNAS */
 
-    rect(
-        -42 + paso,
-        -75,
-        34,
-        78,
-        "#222225"
-    );
+    const piernaIzq =
+        cubo(
+            personaje,
+            -.48,
+            .85,
+            0,
+            .55,
+            1.75,
+            .6,
+            negro
+        );
 
-    rect(
-        10 - paso,
-        -75,
-        34,
-        78,
-        "#222225"
+    const piernaDer =
+        cubo(
+            personaje,
+            .48,
+            .85,
+            0,
+            .55,
+            1.75,
+            .6,
+            negro
+        );
+
+    personaje.userData.piernas.push(
+        piernaIzq,
+        piernaDer
     );
 
 
     /* PIES */
 
-    rect(
-        -52 + paso,
-        0,
-        48,
-        25,
-        "#18181b"
+    cubo(
+        personaje,
+        -.55,
+        -.05,
+        -.15,
+        .95,
+        .4,
+        1.05,
+        negro
     );
 
-    rect(
-        5 - paso,
-        0,
-        48,
-        25,
-        "#18181b"
-    );
-
-
-    /* COLITA */
-
-    rect(
-        42,
-        -120,
-        24,
-        24,
-        "#ffffff"
-    );
-
-    rect(
-        60,
-        -112,
-        18,
-        18,
-        "#222225"
+    cubo(
+        personaje,
+        .55,
+        -.05,
+        -.15,
+        .95,
+        .4,
+        1.05,
+        negro
     );
 
 
     /* GORRO */
 
-    rect(
-        -34,
-        -318,
-        68,
-        20,
-        "#9b67d3"
+    const gorro =
+        new THREE.Group();
+
+    gorro.position.y = 5.7;
+
+    personaje.add(gorro);
+
+    cubo(
+        gorro,
+        0,
+        0,
+        0,
+        1.3,
+        .25,
+        1.15,
+        morado
     );
 
-    rect(
-        -25,
-        -345,
-        50,
-        29,
-        "#f4eaf8"
+    cubo(
+        gorro,
+        0,
+        .35,
+        0,
+        .9,
+        .5,
+        .8,
+        blanco
     );
 
-    rect(
-        -12,
-        -370,
-        27,
-        27,
-        "#9b67d3"
+    cubo(
+        gorro,
+        0,
+        .72,
+        0,
+        .5,
+        .35,
+        .5,
+        morado
     );
 
-    rect(
-        -2,
-        -387,
-        12,
-        17,
-        "#ffd447"
+    cubo(
+        gorro,
+        0,
+        1,
+        0,
+        .22,
+        .22,
+        .22,
+        amarillo
     );
 
 
-    ctx.restore();
+    return personaje;
 }
+
+
+/* =====================================================
+   CREAR PERSONAJES
+===================================================== */
+
+const trex = crearTrex();
+
+const panda = crearPanda();
+
+
+/* ESCALA */
+
+trex.scale.set(
+    1.05,
+    1.05,
+    1.05
+);
+
+panda.scale.set(
+    .82,
+    .82,
+    .82
+);
+
+
+/* POSICIONES INICIALES */
+
+trex.position.set(
+    -13,
+    0,
+    0
+);
+
+panda.position.set(
+    13,
+    0,
+    0
+);
+
+
+/* ORIENTACIÓN */
+
+trex.rotation.y = Math.PI / 2;
+
+panda.rotation.y = -Math.PI / 2;
+
+
+scene.add(trex);
+scene.add(panda);
+
+
+/* =====================================================
+   SUELO
+===================================================== */
+
+const suelo =
+    new THREE.Mesh(
+        new THREE.PlaneGeometry(
+            50,
+            35
+        ),
+        material(0x438b4e)
+    );
+
+suelo.rotation.x =
+    -Math.PI / 2;
+
+suelo.position.y = -0.3;
+
+suelo.receiveShadow = true;
+
+scene.add(suelo);
+
+
+/* =====================================================
+   CAMINO
+===================================================== */
+
+const camino =
+    new THREE.Mesh(
+        new THREE.PlaneGeometry(
+            18,
+            35
+        ),
+        material(0xc8a172)
+    );
+
+camino.rotation.x =
+    -Math.PI / 2;
+
+camino.position.y =
+    -.28;
+
+scene.add(camino);
+
+
+/* =====================================================
+   NUBES VOXEL
+===================================================== */
+
+function nube(x, y, z) {
+
+    const grupo =
+        new THREE.Group();
+
+    cubo(
+        grupo,
+        0,
+        0,
+        0,
+        2.8,
+        .65,
+        .7,
+        blanco
+    );
+
+    cubo(
+        grupo,
+        -.8,
+        .35,
+        0,
+        1.4,
+        .7,
+        .7,
+        blanco
+    );
+
+    cubo(
+        grupo,
+        .7,
+        .4,
+        0,
+        1.2,
+        .8,
+        .7,
+        blanco
+    );
+
+    grupo.position.set(
+        x,
+        y,
+        z
+    );
+
+    scene.add(grupo);
+}
+
+
+nube(-7, 8, -5);
+nube(7, 9, -8);
+nube(0, 10, -10);
 
 
 /* =====================================================
    PASTEL
 ===================================================== */
 
-function dibujarPastel() {
+const pastelGrupo =
+    new THREE.Group();
 
-    let x = W / 2;
-    let y = H * .72;
-
-    /* sombra */
-
-    rect(
-        x - 105,
-        y + 58,
-        210,
-        15,
-        "rgba(0,0,0,.25)"
-    );
+pastelGrupo.position.set(
+    0,
+    -.3,
+    -1
+);
 
 
-    /* plato */
+/* plato */
 
-    rect(
-        x - 100,
-        y + 40,
-        200,
-        18,
-        "#eee7df"
-    );
-
-
-    /* pastel */
-
-    rect(
-        x - 82,
-        y - 15,
-        164,
-        60,
-        "#fff0dc"
-    );
+cubo(
+    pastelGrupo,
+    0,
+    .15,
+    0,
+    3.4,
+    .25,
+    2.1,
+    blanco
+);
 
 
-    /* crema */
+/* pastel */
 
-    rect(
-        x - 82,
-        y - 15,
-        164,
-        20,
-        "#ff91b8"
-    );
-
-
-    /* detalles */
-
-    for (let i = 0; i < 6; i++) {
-
-        rect(
-            x - 70 + i * 28,
-            y + 12,
-            12,
-            13,
-            "#ff91b8"
-        );
-
-    }
+cubo(
+    pastelGrupo,
+    0,
+    .75,
+    0,
+    2.8,
+    1.1,
+    1.65,
+    pastel
+);
 
 
-    /* vela */
+/* crema */
 
-    rect(
-        x - 8,
-        y - 45,
-        16,
-        32,
-        "#8e68d4"
-    );
+cubo(
+    pastelGrupo,
+    0,
+    1.35,
+    0,
+    2.9,
+    .25,
+    1.75,
+    crema
+);
 
 
-    /* llama */
+/* decoración */
 
-    let fuego =
-        Math.sin(performance.now() / 80) * 3;
+for (
+    let i = 0;
+    i < 5;
+    i++
+) {
 
-    rect(
-        x - 7 + fuego,
-        y - 62,
-        14,
-        18,
-        "#ffd447"
-    );
-
-    rect(
-        x - 3 + fuego,
-        y - 67,
-        7,
-        10,
-        "#fff3a3"
+    cubo(
+        pastelGrupo,
+        -1 +
+        i * .5,
+        .7,
+        -.88,
+        .18,
+        .35,
+        .1,
+        rosa
     );
 
 }
+
+
+/* VELA */
+
+cubo(
+    pastelGrupo,
+    0,
+    2,
+    0,
+    .2,
+    1,
+    .2,
+    morado
+);
+
+
+/* LLAMA */
+
+const llama =
+    cubo(
+        pastelGrupo,
+        0,
+        2.65,
+        0,
+        .25,
+        .35,
+        .25,
+        amarillo
+    );
+
+pastelGrupo.visible = false;
+
+scene.add(pastelGrupo);
 
 
 /* =====================================================
    CONFETI
 ===================================================== */
 
+const confeti = [];
+
+const coloresConfeti = [
+    0xff6b81,
+    0xffd447,
+    0x7dc8ff,
+    0xb58bea,
+    0x74d99b,
+    0xffffff
+];
+
+
 function crearConfeti() {
 
-    for (let i = 0; i < 100; i++) {
+    for (
+        let i = 0;
+        i < 90;
+        i++
+    ) {
 
-        confeti.push({
-
-            x: Math.random() * W,
-            y: -Math.random() * H,
-
-            velocidad:
-                2 + Math.random() * 3,
-
-            tamaño:
-                5 + Math.random() * 7,
-
-            rotacion:
-                Math.random() * 360,
-
-            color: [
-                "#ff6b81",
-                "#ffd447",
-                "#7dc8ff",
-                "#b58bea",
-                "#ffffff",
-                "#74d99b"
-            ][Math.floor(Math.random() * 6)]
-
-        });
-    }
-}
+        const pieza =
+            new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    .12,
+                    .35,
+                    .08
+                ),
+                material(
+                    coloresConfeti[
+                        Math.floor(
+                            Math.random() *
+                            coloresConfeti.length
+                        )
+                    ]
+                )
+            );
 
 
-function dibujarConfeti() {
-
-    confeti.forEach(c => {
-
-        c.y += c.velocidad;
-        c.rotacion += 5;
-
-        if (c.y > H + 20) {
-            c.y = -20;
-            c.x = Math.random() * W;
-        }
-
-        ctx.save();
-
-        ctx.translate(c.x, c.y);
-
-        ctx.rotate(
-            c.rotacion * Math.PI / 180
+        pieza.position.set(
+            (Math.random() - .5) * 20,
+            7 + Math.random() * 8,
+            (Math.random() - .5) * 8
         );
 
-        rect(
-            -c.tamaño / 2,
-            -c.tamaño / 2,
-            c.tamaño,
-            c.tamaño * 1.5,
-            c.color
-        );
 
-        ctx.restore();
+        pieza.userData.velocidad =
+            .025 +
+            Math.random() * .04;
 
-    });
-}
+        pieza.userData.rotacion =
+            Math.random() * .1;
 
+        scene.add(pieza);
 
-/* =====================================================
-   CORAZONES Y ESTRELLAS
-===================================================== */
-
-function dibujarEstrellas() {
-
-    let ahora = performance.now();
-
-    for (let i = 0; i < 8; i++) {
-
-        let x = W * .2 + i * W * .085;
-        let y = H * .22 + Math.sin(ahora / 500 + i) * 12;
-
-        ctx.font = "22px Arial";
-
-        ctx.textAlign = "center";
-
-        ctx.fillStyle = "#fff4b0";
-
-        ctx.fillText("✦", x, y);
-
+        confeti.push(pieza);
     }
 }
 
 
 /* =====================================================
-   TEXTO FINAL
+   CORAZONES
 ===================================================== */
 
-function dibujarMensajeFinal() {
+function crearCorazones() {
 
-    const ahora = performance.now();
+    const canvasHeart =
+        document.createElement("canvas");
 
-    if (ahora - inicio < 7200) return;
+    canvasHeart.width = 64;
+    canvasHeart.height = 64;
+
+    const c =
+        canvasHeart.getContext("2d");
+
+    c.fillStyle = "#ff6f91";
+
+    c.font = "55px Arial";
+
+    c.textAlign = "center";
+
+    c.fillText(
+        "♥",
+        32,
+        52
+    );
 
 
-    let progreso =
-        Math.min(
-            1,
-            (ahora - inicio - 7200) / 900
+    const textura =
+        new THREE.CanvasTexture(
+            canvasHeart
         );
 
 
-    ctx.globalAlpha = progreso;
+    for (
+        let i = 0;
+        i < 12;
+        i++
+    ) {
+
+        const sprite =
+            new THREE.Sprite(
+                new THREE.SpriteMaterial({
+                    map: textura,
+                    transparent: true
+                })
+            );
+
+        sprite.scale.set(
+            .65,
+            .65,
+            .65
+        );
+
+        sprite.position.set(
+            (Math.random() - .5) * 5,
+            2 +
+            Math.random() * 4,
+            1
+        );
+
+        sprite.userData.velocidad =
+            .008 +
+            Math.random() * .015;
+
+        scene.add(sprite);
+
+        corazones.push(sprite);
+
+    }
+
+}
+
+const corazones = [];
 
 
-    texto(
-        "🎉 ¡FELIZ CUMPLEAÑOS! 🎉",
-        W / 2,
-        H * .13,
-        Math.min(42, W / 16),
-        "#ffffff"
-    );
+/* =====================================================
+   ANIMACIÓN
+===================================================== */
+
+const reloj =
+    new THREE.Clock();
+
+let tiempoAnterior = 0;
+
+function animarPersonaje(
+    personaje,
+    caminando,
+    velocidad
+) {
+
+    if (!personaje.userData.piernas)
+        return;
 
 
-    texto(
-        "🦖 T-REX 🦖",
-        W / 2,
-        H * .21,
-        Math.min(60, W / 10),
-        "#ffd447"
-    );
+    if (caminando) {
+
+        const paso =
+            Math.sin(
+                tiempoAnterior *
+                velocidad
+            ) * .55;
 
 
-    ctx.globalAlpha = 1;
+        personaje.userData.piernas[0]
+            .rotation.x = paso;
+
+        personaje.userData.piernas[1]
+            .rotation.x = -paso;
+
+
+        personaje.userData.brazos[0]
+            .rotation.x = -paso * .6;
+
+        personaje.userData.brazos[1]
+            .rotation.x = paso * .6;
+
+
+        /* pequeño rebote */
+
+        personaje.position.y =
+            Math.abs(
+                Math.sin(
+                    tiempoAnterior *
+                    velocidad
+                )
+            ) * .08;
+
+    } else {
+
+        personaje.userData.piernas[0]
+            .rotation.x = 0;
+
+        personaje.userData.piernas[1]
+            .rotation.x = 0;
+
+        personaje.userData.brazos[0]
+            .rotation.x = 0;
+
+        personaje.userData.brazos[1]
+            .rotation.x = 0;
+
+        personaje.position.y =
+            Math.sin(
+                tiempoAnterior * 2
+            ) * .025;
+
+    }
+
 }
 
 
 /* =====================================================
-   ACTUALIZAR ANIMACIÓN
+   SECUENCIA
 ===================================================== */
+
+let comienzo =
+    performance.now();
 
 function actualizar() {
 
-    const ahora = performance.now();
-    const segundos = (ahora - inicio) / 1000;
+    const ahora =
+        performance.now();
+
+    let t =
+        (ahora - comienzo) /
+        1000;
 
 
     /*
-       T-REX CAMINA
-       0 - 3.5 segundos
+       REINICIO
     */
 
-    if (segundos < 3.5) {
+    if (t > 11) {
 
-        let progreso =
-            Math.min(1, segundos / 3.5);
+        comienzo =
+            performance.now();
 
-        trex.x =
-            -180 +
-            (W * .43 + 180) * progreso;
+        t = 0;
+
+        trex.position.x = -13;
+
+        panda.position.x = 13;
+
+        pastelGrupo.visible =
+            false;
+
+        document
+            .getElementById("mensaje")
+            .classList.remove("visible");
+
+        confeti.forEach(
+            pieza =>
+                scene.remove(pieza)
+        );
+
+        confeti.length = 0;
+
+        corazones.forEach(
+            corazon =>
+                scene.remove(corazon)
+        );
+
+        corazones.length = 0;
 
     }
 
 
-    /*
-       PANDA CAMINA
-       2 - 5.5 segundos
-    */
+    /* =================================================
+       T-REX CAMINANDO
+    ================================================= */
 
-    if (segundos > 2) {
+    if (t < 4.2) {
 
-        let progreso =
+        const progreso =
             Math.min(
-                1,
-                (segundos - 2) / 3.5
+                t / 4.2,
+                1
             );
 
-        panda.x =
-            W + 150 -
-            (W * .43 + 150) * progreso;
+        trex.position.x =
+            -13 +
+            7.0 * progreso;
+
+        animarPersonaje(
+            trex,
+            true,
+            8
+        );
 
     }
 
 
-    /*
-       A PARTIR DE 5.5 SEGUNDOS
-       LOS DOS SE QUEDAN JUNTOS
-    */
+    /* =================================================
+       PANDA CAMINANDO
+    ================================================= */
 
-    if (segundos >= 5.5) {
+    if (t >= 1.7 && t < 5.3) {
 
-        trex.x = W * .43;
-        panda.x = W * .57;
+        const progreso =
+            Math.min(
+                (t - 1.7) / 3.6,
+                1
+            );
+
+        panda.position.x =
+            13 -
+            7.0 * progreso;
+
+        animarPersonaje(
+            panda,
+            true,
+            8
+        );
 
     }
 
 
-    /*
-       CONFETI
-    */
+    /* =================================================
+       SE ENCUENTRAN
+    ================================================= */
+
+    if (t >= 5.3) {
+
+        trex.position.x = -2.5;
+        panda.position.x = 2.5;
+
+        animarPersonaje(
+            trex,
+            false,
+            8
+        );
+
+        animarPersonaje(
+            panda,
+            false,
+            8
+        );
+
+    }
+
+
+    /* =================================================
+       PASTEL
+    ================================================= */
+
+    if (t >= 5.6) {
+
+        pastelGrupo.visible = true;
+
+    }
+
+
+    /* =================================================
+       CORAZONES
+    ================================================= */
 
     if (
-        segundos >= 5.5 &&
+        t >= 5.7 &&
+        corazones.length === 0
+    ) {
+
+        crearCorazones();
+
+    }
+
+
+    corazones.forEach(
+        corazon => {
+
+            corazon.position.y +=
+                corazon.userData.velocidad;
+
+            corazon.material.opacity =
+                Math.max(
+                    0,
+                    1 -
+                    (corazon.position.y - 2) / 6
+                );
+
+        }
+    );
+
+
+    /* =================================================
+       CONFETI
+    ================================================= */
+
+    if (
+        t >= 6 &&
         confeti.length === 0
     ) {
 
@@ -957,86 +1735,47 @@ function actualizar() {
 
     }
 
-}
+
+    confeti.forEach(
+        pieza => {
+
+            pieza.position.y -=
+                pieza.userData.velocidad;
+
+            pieza.rotation.x +=
+                pieza.userData.rotacion;
+
+            pieza.rotation.z +=
+                pieza.userData.rotacion;
 
 
-/* =====================================================
-   DIBUJAR ESCENA
-===================================================== */
+            if (
+                pieza.position.y < 0
+            ) {
 
-function dibujar() {
+                pieza.position.y =
+                    12;
 
-    dibujarFondo();
+            }
 
-    dibujarEstrellas();
-
-
-    const ahora = performance.now();
-    const segundos = (ahora - inicio) / 1000;
-
-
-    /*
-       T-REX
-    */
-
-    dibujarTrex(
-        trex.x,
-        H * .70,
-        trex.escala,
-        segundos < 3.5
+        }
     );
 
 
-    /*
-       PANDA
-    */
+    /* =================================================
+       MENSAJE
+    ================================================= */
 
-    if (segundos >= 2) {
-
-        dibujarPanda(
-            panda.x,
-            H * .70,
-            panda.escala,
-            segundos < 5.5
+    const mensaje =
+        document.getElementById(
+            "mensaje"
         );
 
-    }
+    if (t >= 7.0) {
 
-
-    /*
-       PASTEL
-       Aparece después de que llegan
-    */
-
-    if (segundos >= 5.5) {
-
-        dibujarPastel();
-
-        dibujarConfeti();
-
-    }
-
-
-    /*
-       MENSAJE
-    */
-
-    dibujarMensajeFinal();
-
-
-    /*
-       REINICIAR AUTOMÁTICAMENTE
-       después de 11 segundos
-    */
-
-    if (segundos >= 11) {
-
-        inicio = performance.now();
-
-        confeti = [];
-
-        trex.x = -180;
-        panda.x = W + 150;
+        mensaje.classList.add(
+            "visible"
+        );
 
     }
 
@@ -1049,15 +1788,44 @@ function dibujar() {
 
 function loop() {
 
+    requestAnimationFrame(loop);
+
+    tiempoAnterior =
+        reloj.getElapsedTime();
+
     actualizar();
 
-    dibujar();
-
-    requestAnimationFrame(loop);
+    renderer.render(
+        scene,
+        camera
+    );
 
 }
 
 loop();
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+);
 
 </script>
 
